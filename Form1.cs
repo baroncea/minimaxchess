@@ -11,8 +11,9 @@ namespace projectIA
 		private int _selectedPieceIndex = -1;
 		private const int CellSize = 100;
 		private const int BoardSize = 5;
+        private int _minimaxDepth = 3;
 
-		public Form1()
+        public Form1()
 		{
 			InitializeComponents();
 			_board = new Board();
@@ -24,15 +25,29 @@ namespace projectIA
 			this.Text = "Chess";
 			this.ClientSize = new Size(BoardSize * CellSize, BoardSize * CellSize + 30);
 
-			var menuStrip = new MenuStrip();
-			var jocMenu = new ToolStripMenuItem("Game");
-			var startMenuItem = new ToolStripMenuItem("Start", null, StartGame);
-			var exitMenuItem = new ToolStripMenuItem("Exit", null, (s, e) => this.Close());
-			jocMenu.DropDownItems.Add(startMenuItem);
-			jocMenu.DropDownItems.Add(exitMenuItem);
-			menuStrip.Items.Add(jocMenu);
+            var menuStrip = new MenuStrip();
+            var jocMenu = new ToolStripMenuItem("Game");
+            var startMenuItem = new ToolStripMenuItem("Start", null, StartGame);
+            var exitMenuItem = new ToolStripMenuItem("Exit", null, (s, e) => this.Close());
+            var settingsMenu = new ToolStripMenuItem("Settings");
+            var easyMenuItem = new ToolStripMenuItem("Easy", null, (s, e) => SetDepth(1));
+            var mediumMenuItem = new ToolStripMenuItem("Medium", null, (s, e) => SetDepth(2));
+            var hardMenuItem = new ToolStripMenuItem("Hard", null, (s, e) => SetDepth(3));
 
-			this.Controls.Add(menuStrip);
+            settingsMenu.DropDownItems.Add(easyMenuItem);
+            settingsMenu.DropDownItems.Add(mediumMenuItem);
+            settingsMenu.DropDownItems.Add(hardMenuItem);
+
+            jocMenu.DropDownItems.Add(startMenuItem);
+            jocMenu.DropDownItems.Add(exitMenuItem);
+            menuStrip.Items.Add(jocMenu);
+            menuStrip.Items.Add(settingsMenu);
+
+            this.Controls.Add(menuStrip);
+            this.MainMenuStrip = menuStrip;
+
+
+            this.Controls.Add(menuStrip);
 			this.MainMenuStrip = menuStrip;
 
 			this.Paint += PaintTable;
@@ -106,9 +121,10 @@ namespace projectIA
 			else
 			{
 				var selectedPiece = _board.Pieces[_selectedPieceIndex];
-				var move = new Move(selectedPiece.X, selectedPiece.Y, x, y);
+				var move = selectedPiece.GetValidMoves(_board).FirstOrDefault(m => m.EndX == x && m.EndY == y);
 
-				if (selectedPiece.GetValidMoves(_board).Any(m => m.EndX == move.EndX && m.EndY == move.EndY))
+
+                if (move != null)
 				{
 					_board = _board.MakeMove(move);
 					_selectedPieceIndex = -1;
@@ -118,6 +134,8 @@ namespace projectIA
 						MessageBox.Show(winner == PlayerType.Human ? "You won!" : "The computer has won!", "Game has finished.");
 						_board = new Board();
 					}
+					else
+						ComputerMove();
 				}
 				else
 				{
@@ -128,6 +146,24 @@ namespace projectIA
 			this.Invalidate();
 		}
 
-		
-	}
+        private void ComputerMove()
+        {
+            Board nextBoard = Minimax.FindNextBoard(_board, _minimaxDepth);
+            _board = nextBoard;
+            this.Invalidate();
+
+            _board.CheckFinish(out bool finished, out PlayerType winner);
+            if (finished)
+            {
+                MessageBox.Show(winner == PlayerType.Human ? "You won!" : "The computer has won!", "Game has finished.");
+                _board = new Board();
+            }
+        }
+
+        private void SetDepth(int depth)
+        {
+            _minimaxDepth = depth;
+            MessageBox.Show($"AI difficulty set to {(depth == 1 ? "Easy" : depth == 2 ? "Medium" : "Hard")}", "Difficulty Updated");
+        }
+    }
 }

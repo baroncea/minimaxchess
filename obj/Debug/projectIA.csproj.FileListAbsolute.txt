@@ -1,9 +1,0 @@
-E:\ia\projectIA\bin\Debug\projectIA.exe.config
-E:\ia\projectIA\bin\Debug\projectIA.exe
-E:\ia\projectIA\bin\Debug\projectIA.pdb
-E:\ia\projectIA\obj\Debug\projectIA.csproj.AssemblyReference.cache
-E:\ia\projectIA\obj\Debug\projectIA.Properties.Resources.resources
-E:\ia\projectIA\obj\Debug\projectIA.csproj.GenerateResource.cache
-E:\ia\projectIA\obj\Debug\projectIA.csproj.CoreCompileInputs.cache
-E:\ia\projectIA\obj\Debug\projectIA.exe
-E:\ia\projectIA\obj\Debug\projectIA.pdb

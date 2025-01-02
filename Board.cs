@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace projectIA
 {
@@ -43,16 +44,27 @@ namespace projectIA
 			}
 		}
 
-		public Board MakeMove(Move move)
-		{
-			Board nextBoard = new Board(this);
-			Piece piece = nextBoard.Pieces.First(p => p.X == move.StartX && p.Y == move.StartY);
-			piece.X = move.EndX;
-			piece.Y = move.EndY;
-			return nextBoard;
-		}
+        public Board MakeMove(Move move)
+        {
+            Board nextBoard = new Board(this);
 
-		public void CheckFinish(out bool finished, out PlayerType winner)
+            Piece piece = nextBoard.Pieces.First(p => p.X == move.StartX && p.Y == move.StartY);
+            if (move.IsCapture)
+            {
+                var capturedPiece = nextBoard.Pieces.FirstOrDefault(p => p.X == move.EndX && p.Y == move.EndY && p.Player != piece.Player);
+				if (capturedPiece != null)
+				{
+					nextBoard.Pieces.Remove(capturedPiece);
+				}
+            }
+
+            piece.X = move.EndX;
+            piece.Y = move.EndY;
+
+            return nextBoard;
+        }
+
+        public void CheckFinish(out bool finished, out PlayerType winner)
 		{
 			if (!Pieces.Any(p => p.Type == "King" && p.Player == PlayerType.Human))
 			{
@@ -71,6 +83,42 @@ namespace projectIA
 			finished = false;
 			winner = PlayerType.None;
 		}
-	}
 
+        public double EvaluationFunction()
+        {
+            var pieceValues = new Dictionary<string, double>
+			{
+				{ "Pawn", 1.0 },
+				{ "Knight", 3.0 },
+				{ "Bishop", 3.0 },
+				{ "Rook", 5.0 },
+				{ "King", 100.0 }
+			};
+
+            double score = 0.0;
+
+            foreach (Piece piece in Pieces)
+            {
+                double pieceValue = pieceValues.ContainsKey(piece.Type) ? pieceValues[piece.Type] : 0.0;
+
+                if (piece.Player == PlayerType.Computer)
+                {
+                    score += pieceValue;
+
+                    // Encourage central positions
+                    score += 0.1 * (Math.Abs(Size / 2 - piece.X) + Math.Abs(Size / 2 - piece.Y));
+                }
+                else if (piece.Player == PlayerType.Human)
+                {
+                    score -= pieceValue;
+
+                    // Penalize central positions for opponent
+                    score -= 0.1 * (Math.Abs(Size / 2 - piece.X) + Math.Abs(Size / 2 - piece.Y));
+                }
+            }
+
+            return score;
+        }
+
+    }
 }

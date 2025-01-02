@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace projectIA
 {
@@ -25,6 +22,7 @@ namespace projectIA
 		public List<Move> GetValidMoves(Board board)
 		{
 			List<Move> validMoves = new List<Move>();
+			bool[] directions = {true, true, true, true};
 
 			switch (Type)
 			{
@@ -34,23 +32,27 @@ namespace projectIA
 					if (newY >= 0 && newY < board.Size)
 					{
 						if (!board.Pieces.Any(p => p.X == X && p.Y == newY))
-							validMoves.Add(new Move(X, Y, X, newY));
+							validMoves.Add(new Move(X, Y, X, newY, false));
 
 						if (X - 1 >= 0 && board.Pieces.Any(p => p.X == X - 1 && p.Y == newY && p.Player != Player))
-							validMoves.Add(new Move(X, Y, X - 1, newY));
+							validMoves.Add(new Move(X, Y, X - 1, newY, true));
 
 						if (X + 1 < board.Size && board.Pieces.Any(p => p.X == X + 1 && p.Y == newY && p.Player != Player))
-							validMoves.Add(new Move(X, Y, X + 1, newY));
+							validMoves.Add(new Move(X, Y, X + 1, newY, true));
 					}
 					break;
 
 				case "Rook":
 					for (int i = 1; i < board.Size; i++)
 					{
-						AddMoveIfValid(board, validMoves, X + i, Y);
-					    AddMoveIfValid(board, validMoves, X - i, Y);
-						AddMoveIfValid(board, validMoves, X, Y + i);
-						AddMoveIfValid(board, validMoves, X, Y - i);
+						if (directions[0])
+							directions[0] = AddMoveIfValid(board, validMoves, X + i, Y);
+                        if (directions[1])
+                            directions[1] = AddMoveIfValid(board, validMoves, X - i, Y);
+                        if (directions[2])
+                            directions[2] = AddMoveIfValid(board, validMoves, X, Y + i);
+                        if (directions[3])
+                            directions[3] = AddMoveIfValid(board, validMoves, X, Y - i);
 					}
 					break;
 
@@ -58,11 +60,14 @@ namespace projectIA
 				
 					for (int i = 1; i < board.Size; i++)
 					{
-
-						AddMoveIfValid(board, validMoves, X + i, Y + i);
-						AddMoveIfValid(board, validMoves, X - i, Y + i);
-						AddMoveIfValid(board, validMoves, X + i, Y - i);
-						AddMoveIfValid(board, validMoves, X - i, Y - i);
+                        if (directions[0])
+                            directions[0] = AddMoveIfValid(board, validMoves, X + i, Y + i);
+                        if (directions[1])
+                            directions[1] = AddMoveIfValid(board, validMoves, X - i, Y + i);
+                        if (directions[2])
+                            directions[2] = AddMoveIfValid(board, validMoves, X + i, Y - i);
+                        if (directions[3])
+                            directions[3] = AddMoveIfValid(board, validMoves, X - i, Y - i);
 					}
 					break;
 
@@ -95,13 +100,18 @@ namespace projectIA
 		{
 			if (x >= 0 && x < board.Size && y >= 0 && y < board.Size)
 			{
-				if (!board.Pieces.Any(p => p.X == x && p.Y == y))
+                var pieceAtPosition = board.Pieces.FirstOrDefault(p => p.X == x && p.Y == y);
+				if (pieceAtPosition == null)
 				{
-					validMoves.Add(new Move(X, Y, x, y));
+					validMoves.Add(new Move(X, Y, x, y, false));
 					return true;
 				}
-				
-			}
+				else if (pieceAtPosition.Player != Player)
+				{
+					validMoves.Add(new Move(X, Y, x, y, true));
+					return false;
+				}
+            }
 			return false;
 		}
 	}
