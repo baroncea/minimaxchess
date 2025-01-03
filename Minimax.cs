@@ -28,7 +28,7 @@ namespace projectIA
                     }
 
                     alpha = Math.Max(alpha, value);
-                    if (bestValue >= beta)
+                    if (alpha >= beta)
                         break;
                 }
             }
@@ -64,7 +64,7 @@ namespace projectIA
                         double eval = MinimaxAlgorithm(nextBoard, depth - 1, alpha, beta, false);
                         maxEval = Math.Max(maxEval, eval);
                         alpha = Math.Max(alpha, eval);
-                        if (maxEval >= beta)
+                        if (alpha >= beta)
                             break;
                     }
                 }
@@ -83,7 +83,7 @@ namespace projectIA
                         double eval = MinimaxAlgorithm(nextBoard, depth - 1, alpha, beta, true);
                         minEval = Math.Min(minEval, eval);
                         beta = Math.Min(beta, eval);
-                        if (minEval <= alpha)
+                        if (beta <= alpha)
                             break;
                     }
                 }
